@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: psm-service
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: 817f089a-9304-4a52-9ad8-6c5a65c022e2
+        group: dev
+        file-extension: yml
