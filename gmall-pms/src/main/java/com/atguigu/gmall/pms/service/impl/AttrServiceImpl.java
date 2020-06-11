@@ -27,4 +27,8 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         return new PageVo(page);
     }
 
+    @Override
+    public PageVo queryAttrsByCid(QueryCondition params, Long cid, Integer type) {
+        return null;
+    }
 }
