@@ -62,7 +62,7 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
         List<Long> attrIds = relations.stream().map(relationEntity -> relationEntity.getAttrId()).collect(Collectors.toList());
         List<AttrEntity> attrEntities = attrDao.selectBatchIds(attrIds);
         groupVO.setAttrEntities(attrEntities);
-        return null;
+        return groupVO;
     }
 
     @Override
