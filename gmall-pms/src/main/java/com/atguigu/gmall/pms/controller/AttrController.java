@@ -1,16 +1,15 @@
 package com.atguigu.gmall.pms.controller;
 
 import java.util.Arrays;
-import java.util.Map;
 
 
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
+import com.atguigu.gmall.pms.vo.AttrVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,8 +72,8 @@ public class AttrController {
     @ApiOperation("保存")
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('pms:attr:save')")
-    public Resp<Object> save(@RequestBody AttrEntity attr){
-		attrService.save(attr);
+    public Resp<Object> save(@RequestBody AttrVO attrVO){
+		this.attrService.saveAttr(attrVO);
 
         return Resp.ok(null);
     }

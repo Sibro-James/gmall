@@ -9,6 +9,7 @@ import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
 import com.atguigu.gmall.pms.vo.GroupVO;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,12 @@ public class AttrGroupController {
     @GetMapping("/withattr/{gid}")
     public Resp<GroupVO> queryGroupWithAttrsByCid(@PathVariable("gid") Long gid){
         GroupVO list = attrGroupService.queryGroupWithAttrsByCid(gid);
+        return Resp.ok(list);
+    }
+
+    @GetMapping("/withattrs/cat/{catId}")
+    public Resp<List<GroupVO>> queryGroupWithAttrsByCatid(@PathVariable("catId") Long catId){
+        List<GroupVO> list = attrGroupService.queryGroupWithAttrsByCatid(catId);
         return Resp.ok(list);
     }
 
