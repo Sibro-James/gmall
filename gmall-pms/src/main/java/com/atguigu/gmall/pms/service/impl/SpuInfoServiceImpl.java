@@ -1,19 +1,25 @@
 package com.atguigu.gmall.pms.service.impl;
 
+import com.atguigu.gmall.pms.dao.SkuInfoDao;
 import com.atguigu.gmall.pms.dao.SpuInfoDescDao;
-import com.atguigu.gmall.pms.entity.ProductAttrValueEntity;
-import com.atguigu.gmall.pms.entity.SkuSaleAttrValueEntity;
-import com.atguigu.gmall.pms.entity.SpuInfoDescEntity;
+import com.atguigu.gmall.pms.entity.*;
+import com.atguigu.gmall.pms.feign.GmallSmsClient;
 import com.atguigu.gmall.pms.service.ProductAttrValueService;
+import com.atguigu.gmall.pms.service.SkuImagesService;
+import com.atguigu.gmall.pms.service.SkuSaleAttrValueService;
 import com.atguigu.gmall.pms.vo.BaseAttrVO;
+import com.atguigu.gmall.pms.vo.SkuInfoVO;
+import com.atguigu.gmall.pms.vo.SkuSaleVO;
 import com.atguigu.gmall.pms.vo.SpuInfoVO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -24,7 +30,6 @@ import com.atguigu.core.bean.Query;
 import com.atguigu.core.bean.QueryCondition;
 
 import com.atguigu.gmall.pms.dao.SpuInfoDao;
-import com.atguigu.gmall.pms.entity.SpuInfoEntity;
 import com.atguigu.gmall.pms.service.SpuInfoService;
 import org.springframework.util.CollectionUtils;
 
@@ -36,7 +41,15 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Autowired
     private SpuInfoDescDao descDao;
     @Autowired
+    private SkuInfoDao skuInfoDao;
+    @Autowired
     private ProductAttrValueService attrValueService;
+    @Autowired
+    private SkuImagesService skuImagesService;
+    @Autowired
+    private SkuSaleAttrValueService skuSaleAttrValueService;
+    @Autowired
+    private GmallSmsClient gmallSmsClient;
 
     @Override
     public PageVo queryPage(QueryCondition params) {
@@ -100,18 +113,49 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         }
 
         //2.保存sku的三张表
-        //2.1保存pms_sku_Info信息
+        List<SkuInfoVO> skus = spuInfoVO.getSkus();
+        if (CollectionUtils.isEmpty(skus)){
+            return;
+        }
 
-        //2.2保存pms_sku_images信息
+        skus.forEach(skuInfoVO -> {
+            //2.1保存pms_sku_Info信息
+            skuInfoVO.setSpuId(spuInfoVO.getId());
+            skuInfoVO.setSkuCode(UUID.randomUUID().toString());
+            skuInfoVO.setBrandId(spuInfoVO.getBrandId());
+            skuInfoVO.setCatalogId(spuInfoVO.getCatalogId());
+            List<String> images = skuInfoVO.getImages();
+            if (!CollectionUtils.isEmpty(images)){
+                skuInfoVO.setSkuDefaultImg(StringUtils.isNotBlank(skuInfoVO.getSkuDefaultImg())?skuInfoVO.getSkuDefaultImg():
+                        images.get(0));
+            }
 
-        //2.2保存pms_sale_attr_value信息
+            this.skuInfoDao.insert(skuInfoVO);
+            Long skuId = skuInfoVO.getSkuId();
+            //2.2保存pms_sku_images信息
+            if (!CollectionUtils.isEmpty(images)){
+                List<SkuImagesEntity> skuImageEntities = images.stream().map(s -> {
+                    SkuImagesEntity imagesEntity = new SkuImagesEntity();
+                    imagesEntity.setImgUrl(s);
+                    imagesEntity.setSkuId(skuId);
+                    imagesEntity.setDefaultImg(skuInfoVO.getSkuDefaultImg().equals(s) ? 1 : 0);
+                    return imagesEntity;
+                }).collect(Collectors.toList());
+                this.skuImagesService.saveBatch(skuImageEntities);
+            }
 
+            //2.2保存pms_sale_attr_value信息
+            List<SkuSaleAttrValueEntity> saleAttrs = skuInfoVO.getSaleAttrs();
+            if (!CollectionUtils.isEmpty(saleAttrs)){
+                saleAttrs.forEach(skuSaleAttrValueEntity -> skuSaleAttrValueEntity.setSkuId(skuId));
+                this.skuSaleAttrValueService.saveBatch(saleAttrs);
+            }
 
-        //3.保存营销信息的三张表
-        //3.1保存sms_sku_bounds信息
-
-        //3.2保存sms_sku_ladder信息
-
-        //3.2保存sms_sku_full_reduction信息
+            //3.保存营销信息的三张表(Feign)
+            SkuSaleVO skuSaleVO = new SkuSaleVO();
+            BeanUtils.copyProperties(skuInfoVO,skuSaleVO);
+//            skuSaleVO.setSkuId(skuId);
+            this.gmallSmsClient.saveSale(skuSaleVO);
+        });
     }
 }
