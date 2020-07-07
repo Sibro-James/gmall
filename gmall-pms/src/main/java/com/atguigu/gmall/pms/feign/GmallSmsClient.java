@@ -1,13 +1,8 @@
 package com.atguigu.gmall.pms.feign;
 
-import com.atguigu.core.bean.Resp;
-import com.atguigu.gmall.pms.vo.SkuSaleVO;
+import com.atguigu.gmall.sms.api.GmallSmsApi;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient("sms-service")
-public interface GmallSmsClient {
-    @PostMapping("sms/skubounds/sku/save/sale")
-    public Resp<Object> saveSale(@RequestBody SkuSaleVO skuSaleVO);
+public interface GmallSmsClient extends GmallSmsApi {
 }
