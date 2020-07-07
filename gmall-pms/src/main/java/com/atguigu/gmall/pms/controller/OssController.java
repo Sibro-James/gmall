@@ -6,6 +6,7 @@ import com.aliyun.oss.common.utils.BinaryUtil;
 import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.PolicyConditions;
 import com.atguigu.core.bean.Resp;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,13 +20,20 @@ import java.util.Map;
 @RequestMapping("pms/oss")
 public class OssController {
 
+    @Value("${oss.accessKeyId}")
+    private String accessId;
+
+    @Value("${oss.AccessKeySecret}")
+    private String accessKey;
+
+    @Value("${oss.endpoint}")
+    private String endpoint;
+
+    @Value("${oss.bucket}")
+    private String bucket;
 
     @GetMapping("/policy")
     public Resp<Object> policy(){
-        String accessId = "LTAI4FzM45rRR8hSupZL8fKD"; // 请填写您的AccessKeyId。
-        String accessKey = "3ONkmchfoqweFjY4dR1oSOTBy11Z6f"; // 请填写您的AccessKeySecret。
-        String endpoint = "oss-cn-shanghai.aliyuncs.com"; // 请填写您的 endpoint。
-        String bucket = "gmall-sibro"; // 请填写您的 bucketname 。
         String host = "https://" + bucket + "." + endpoint; // host的格式为 bucketname.endpoint
         // callbackUrl为 上传回调服务器的URL，请将下面的IP和Port配置为您自己的真实信息。
 //        String callbackUrl = "http://88.88.88.88:8888";
