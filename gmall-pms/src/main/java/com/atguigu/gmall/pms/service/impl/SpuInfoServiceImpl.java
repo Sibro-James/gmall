@@ -10,6 +10,7 @@ import com.atguigu.gmall.pms.service.SkuSaleAttrValueService;
 import com.atguigu.gmall.pms.vo.BaseAttrVO;
 import com.atguigu.gmall.pms.vo.SkuInfoVO;
 import com.atguigu.gmall.pms.vo.SpuInfoVO;
+import com.atguigu.gmall.sms.vo.SkuSaleVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
